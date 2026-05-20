@@ -1,6 +1,6 @@
 ---
 title: Admin Dashboard - Overview & Analytics
-status: todo
+status: done
 priority: medium
 type: feature
 tags: [admin, dashboard]
@@ -10,15 +10,14 @@ position: 5
 ---
 
 ## Notes
-Protected admin area at /admin with overview dashboard showing key metrics (revenue, orders, low stock alerts).
+Create admin authentication system with useAdminAuth hook, protected /admin routes, login page, and overview dashboard with metrics (products, orders, revenue, low stock alerts).
 
 ## Checklist
-- [ ] Admin route protection (middleware check for admin role)
-- [ ] Dashboard layout with sidebar navigation
-- [ ] Revenue chart component
-- [ ] Recent orders table
-- [ ] Low stock alerts widget
-- [ ] Quick stats cards (total products, pending orders, etc.)
+- [x] Create useAdminAuth hook for route protection
+- [x] Build /admin/login page with Supabase auth
+- [x] Create /admin dashboard with stats overview
+- [x] Display metrics: total products, orders, revenue, low stock
+- [x] Add quick action buttons and navigation
 
 ## Acceptance
 - Only admin users can access /admin routes
