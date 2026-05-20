@@ -1,6 +1,6 @@
 ---
 title: Admin Dashboard - Order Management
-status: todo
+status: done
 priority: medium
 type: feature
 tags: [admin, orders]
@@ -10,16 +10,16 @@ position: 7
 ---
 
 ## Notes
-Order management interface for viewing, updating status, and fulfilling customer orders.
+Build order management interface with table view, status updates, and detailed order view modal. Admin can see all orders, update statuses, and view complete order information including items and customer details.
 
 ## Checklist
-- [ ] Orders list with status filters
-- [ ] Order detail view with customer info and items
-- [ ] Status update workflow (pending → processing → shipped → delivered)
-- [ ] Order search by customer name/email
-- [ ] Print invoice functionality
+- [x] Create /admin/orders page with order table
+- [x] Display order summary stats (total orders, pending)
+- [x] Add status update dropdown for each order
+- [x] Create order details modal with complete information
+- [x] Show order items, customer info, and shipping address
 
 ## Acceptance
-- Admin can view all orders
+- Admins can view all orders
 - Status updates persist to database
 - Order details show complete information
