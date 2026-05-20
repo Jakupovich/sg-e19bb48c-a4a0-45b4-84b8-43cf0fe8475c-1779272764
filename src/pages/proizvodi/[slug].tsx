@@ -12,12 +12,20 @@ import { productService, type Product } from "@/services/productService";
 import { useCart } from "@/contexts/CartContext";
 import { Loader2, ShoppingCart, Snowflake, Flame, Check, Package, Shield, Truck } from "lucide-react";
 
+type ProductWithCategory = Product & {
+  categories?: {
+    name: string;
+    slug: string;
+    icon: string;
+  } | null;
+};
+
 export default function ProductDetailPage() {
   const router = useRouter();
   const { slug } = router.query;
   const { addItem } = useCart();
 
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductWithCategory | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
