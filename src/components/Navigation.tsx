@@ -1,14 +1,42 @@
 import Link from "next/link";
-import { useState } from "react";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/CartDrawer";
+import { supabase } from "@/integrations/supabase/client";
+import { useRouter } from "next/router";
 
 export function Navigation() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const { totalItems, openCart } = useCart();
+
+  useEffect(() => {
+    // Check if user is logged in
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+
+    checkUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
 
   return (
     <>
@@ -53,8 +81,44 @@ export function Navigation() {
               </Link>
             </div>
 
-            {/* Cart & Mobile Menu */}
-            <div className="flex items-center gap-4">
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-3">
+              {/* Auth Buttons - Desktop */}
+              {user ? (
+                <div className="hidden md:flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="text-sm font-mono"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Odjavi se
+                  </Button>
+                </div>
+              ) : (
+                <div className="hidden md:flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push("/login")}
+                    className="text-sm font-mono"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Prijava
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push("/register")}
+                    className="text-sm font-mono border-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    Registracija
+                  </Button>
+                </div>
+              )}
+
+              {/* Cart Button */}
               <Button
                 variant="outline"
                 size="icon"
@@ -69,6 +133,7 @@ export function Navigation() {
                 )}
               </Button>
 
+              {/* Mobile Menu Toggle */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -116,6 +181,50 @@ export function Navigation() {
                 >
                   Kontakt
                 </Link>
+
+                {/* Mobile Auth */}
+                <div className="border-t border-border/50 pt-4 mt-2 space-y-2">
+                  {user ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full text-sm font-mono"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Odjavi se
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          router.push("/login");
+                          setMobileMenuOpen(false);
+                        }}
+                        className="w-full text-sm font-mono"
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        Prijava
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => {
+                          router.push("/register");
+                          setMobileMenuOpen(false);
+                        }}
+                        className="w-full text-sm font-mono bg-primary text-primary-foreground"
+                      >
+                        Registracija
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           )}
