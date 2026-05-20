@@ -80,8 +80,8 @@ export function ProductCard({ product }: ProductCardProps) {
                 {product.price.toFixed(2)} KM
               </div>
               <div className="text-xs text-muted-foreground">
-                {product.stock_quantity > 0 ? (
-                  <span className="text-green-500">Na stanju: {product.stock_quantity}</span>
+                {product.stock > 0 ? (
+                  <span className="text-green-500">Na stanju: {product.stock}</span>
                 ) : (
                   <span className="text-destructive">Nema na stanju</span>
                 )}
