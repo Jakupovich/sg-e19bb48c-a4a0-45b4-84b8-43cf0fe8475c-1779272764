@@ -8,15 +8,15 @@
   :root {
     --radius: 0.5rem;
     
-    /* ALZA Brand Colors */
-    --background: 240 4% 4%;           /* Obsidian black #09090b */
-    --foreground: 0 0% 100%;           /* Pure white */
+    /* ALZA Light Theme - Professional Business */
+    --background: 0 0% 100%;           /* Pure white #FFFFFF */
+    --foreground: 0 0% 10%;            /* Near black for text */
     
-    --card: 240 5% 8%;                 /* Slightly lighter black */
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 98%;                  /* Light grey cards #FAFAFA */
+    --card-foreground: 0 0% 10%;
     
-    --popover: 240 6% 10%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
     
     /* Electric Blue - Primary (Cooling) */
     --primary: 240 100% 50%;           /* #0000FF */
@@ -26,8 +26,8 @@
     --secondary: 0 100% 50%;           /* #FF0000 */
     --secondary-foreground: 0 0% 100%;
     
-    --muted: 240 4% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 96%;                 /* Light grey for muted elements */
+    --muted-foreground: 0 0% 45%;      /* Medium grey text */
     
     --accent: 240 100% 50%;            /* Blue accent */
     --accent-foreground: 0 0% 100%;
@@ -35,23 +35,23 @@
     --destructive: 0 100% 50%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 240 20% 18%;
-    --input: 240 20% 18%;
+    --border: 0 0% 90%;                /* Subtle borders #E5E5E5 */
+    --input: 0 0% 90%;
     --ring: 240 100% 50%;
     
     /* Custom HVAC colors */
     --electric-blue: 240 100% 50%;     /* Cooling */
     --signal-red: 0 100% 50%;          /* Heating */
-    --cyan-glow: 180 100% 50%;         /* Cool glow */
+    --cyan-glow: 180 100% 45%;         /* Cool glow - slightly darker for visibility */
     --orange-glow: 30 100% 50%;        /* Warm glow */
     
-    --sidebar: 240 5% 6%;
-    --sidebar-foreground: 0 0% 95%;
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 0 0% 10%;
     --sidebar-primary: 240 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 5% 12%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 240 20% 18%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 90%;
     --sidebar-ring: 240 100% 50%;
   }
 }
@@ -75,60 +75,60 @@
     @apply mx-auto px-4 md:px-6 lg:px-8 max-w-7xl w-full;
   }
   
-  /* Glassmorphism Card */
+  /* Modern Card with subtle shadow */
   .glass-card {
-    @apply bg-card/40 backdrop-blur-xl border border-border/50 rounded-lg;
+    @apply bg-card border border-border rounded-lg shadow-sm;
   }
   
-  /* Neon Glow Effects */
+  /* Subtle accent shadows for light theme */
   .glow-blue {
-    box-shadow: 0 0 20px rgba(0, 0, 255, 0.5), 
-                0 0 40px rgba(0, 0, 255, 0.3),
-                0 0 60px rgba(0, 0, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 255, 0.15), 
+                0 4px 16px rgba(0, 0, 255, 0.1);
   }
   
   .glow-red {
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5), 
-                0 0 40px rgba(255, 0, 0, 0.3),
-                0 0 60px rgba(255, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.15), 
+                0 4px 16px rgba(255, 0, 0, 0.1);
   }
   
   .glow-cyan {
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4), 
-                0 0 30px rgba(0, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 180, 216, 0.15), 
+                0 4px 16px rgba(0, 180, 216, 0.1);
   }
   
-  /* Neon Border */
+  /* Clean borders with accent colors */
   .border-neon-blue {
-    @apply border-2 border-primary shadow-[0_0_10px_rgba(0,0,255,0.5)];
+    @apply border-2 border-primary;
   }
   
   .border-neon-red {
-    @apply border-2 border-secondary shadow-[0_0_10px_rgba(255,0,0,0.5)];
+    @apply border-2 border-secondary;
   }
   
-  /* Hover Glow */
+  /* Subtle hover effects */
   .hover-glow-blue {
-    @apply transition-shadow duration-300;
+    @apply transition-all duration-300;
   }
   
   .hover-glow-blue:hover {
-    box-shadow: 0 0 20px rgba(0, 0, 255, 0.6), 
-                0 0 40px rgba(0, 0, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 255, 0.2), 
+                0 8px 24px rgba(0, 0, 255, 0.15);
+    transform: translateY(-2px);
   }
   
   .hover-glow-red:hover {
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.6), 
-                0 0 40px rgba(255, 0, 0, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2), 
+                0 8px 24px rgba(255, 0, 0, 0.15);
+    transform: translateY(-2px);
   }
   
-  /* Gradient Text */
+  /* Gradient Text - works on light background */
   .gradient-blue {
-    @apply bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent;
   }
   
   .gradient-red {
-    @apply bg-gradient-to-r from-secondary via-orange-500 to-secondary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-red-600 via-red-500 to-red-600 bg-clip-text text-transparent;
   }
 }
 
@@ -137,7 +137,7 @@
     text-wrap: balance;
   }
   
-  /* Animated gradient background */
+  /* Smooth gradient animation */
   .animate-gradient {
     background-size: 200% 200%;
     animation: gradient 8s ease infinite;
@@ -148,18 +148,18 @@
     50% { background-position: 100% 50%; }
   }
   
-  /* Pulse glow animation */
+  /* Subtle pulse for light theme */
   .animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
+    animation: pulse-glow-light 2s ease-in-out infinite;
   }
   
-  @keyframes pulse-glow {
+  @keyframes pulse-glow-light {
     0%, 100% {
-      box-shadow: 0 0 10px rgba(0, 0, 255, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 255, 0.1);
     }
     50% {
-      box-shadow: 0 0 20px rgba(0, 0, 255, 0.6), 
-                  0 0 40px rgba(0, 0, 255, 0.3);
+      box-shadow: 0 4px 16px rgba(0, 0, 255, 0.2), 
+                  0 8px 24px rgba(0, 0, 255, 0.15);
     }
   }
 }
