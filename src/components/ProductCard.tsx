@@ -4,6 +4,7 @@ import { ShoppingCart, Snowflake, Flame } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/contexts/CartContext";
 import type { Product } from "@/services/productService";
 
 interface ProductCardProps {
@@ -17,6 +18,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { addItem } = useCart();
   const isCooling = product.categories?.slug?.includes("klima");
   const glowColor = isCooling ? "blue" : "red";
   const Icon = isCooling ? Snowflake : Flame;
@@ -98,8 +100,9 @@ export function ProductCard({ product }: ProductCardProps) {
               }`}
               onClick={(e) => {
                 e.preventDefault();
-                // TODO: Add to cart logic
+                addItem(product);
               }}
+              disabled={product.stock === 0}
             >
               <ShoppingCart className="w-5 h-5" />
             </Button>
