@@ -16,6 +16,21 @@ export interface ProductFormData {
 }
 
 export const productAdminService = {
+  async getProductById(id: string): Promise<Product> {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching product:", error);
+      throw error;
+    }
+
+    return data;
+  },
+
   async createProduct(data: ProductFormData): Promise<Product> {
     const { publish_to_pikba, ...productData } = data;
     

@@ -47,7 +47,7 @@ export default function AdminProductsPage() {
       if (!user) return;
 
       try {
-        const data = await productService.getAllProducts();
+        const data = await productService.getProducts();
         setProducts(data);
       } catch (error) {
         console.error("Failed to load products:", error);

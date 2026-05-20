@@ -1,6 +1,6 @@
 ---
 title: Admin Dashboard - Product Management
-status: in_progress
+status: done
 priority: medium
 type: feature
 tags: [admin, crud]
@@ -16,9 +16,9 @@ Build complete CRUD system for product management with image upload to Supabase 
 - [x] Create productAdminService with CRUD + syncToPikBa()
 - [x] Build /admin/products list page with search
 - [x] Create /admin/products/new form with Pik.ba toggle
-- [ ] Create /admin/products/[id] edit form
-- [ ] Test Supabase Storage upload
-- [ ] Verify Pik.ba toggle triggers sync
+- [x] Create /admin/products/[id] edit form
+- [x] Test Supabase Storage upload
+- [x] Verify Pik.ba toggle triggers sync
 
 ## Acceptance
 - Admins can create/edit/delete products
