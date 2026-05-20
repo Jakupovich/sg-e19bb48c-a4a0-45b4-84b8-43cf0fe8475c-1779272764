@@ -215,8 +215,8 @@ export default function AdminOrdersPage() {
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
-                            <div className="font-medium">{order.customer_name}</div>
-                            <div className="text-muted-foreground">{order.customer_email}</div>
+                            <div className="font-medium">{String(order.customer_name || "")}</div>
+                            <div className="text-muted-foreground">{String(order.customer_email || "")}</div>
                           </div>
                         </TableCell>
                         <TableCell className="font-mono font-semibold text-primary">
@@ -300,19 +300,19 @@ export default function AdminOrdersPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Ime i prezime</p>
-                    <p>{selectedOrder.customer_name}</p>
+                    <p>{String(selectedOrder.customer_name || "")}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Email</p>
-                    <p>{selectedOrder.customer_email}</p>
+                    <p>{String(selectedOrder.customer_email || "")}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Telefon</p>
-                    <p>{selectedOrder.customer_phone}</p>
+                    <p>{String(selectedOrder.customer_phone || "")}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Adresa</p>
-                    <p>{selectedOrder.shipping_address}</p>
+                    <p>{String(selectedOrder.shipping_address || "")}</p>
                   </div>
                 </div>
               </div>
@@ -331,7 +331,7 @@ export default function AdminOrdersPage() {
                             {item.quantity}x
                           </div>
                           <div>
-                            <p className="font-medium">{item.products?.name || "N/A"}</p>
+                            <p className="font-medium">{String(item.products?.name || "N/A")}</p>
                             <p className="text-sm text-muted-foreground">
                               {item.price.toFixed(2)} KM po jedinici
                             </p>
@@ -349,7 +349,7 @@ export default function AdminOrdersPage() {
               {selectedOrder.notes && (
                 <div className="border-t border-border/50 pt-4">
                   <h3 className="font-mono font-semibold mb-2">Napomene</h3>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.notes}</p>
+                  <p className="text-sm text-muted-foreground">{String(selectedOrder.notes || "")}</p>
                 </div>
               )}
             </div>
