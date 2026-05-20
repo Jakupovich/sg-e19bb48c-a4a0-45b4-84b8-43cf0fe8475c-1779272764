@@ -1,6 +1,6 @@
 ---
 title: Admin Dashboard - Product Management
-status: todo
+status: in_progress
 priority: medium
 type: feature
 tags: [admin, crud]
@@ -10,18 +10,17 @@ position: 6
 ---
 
 ## Notes
-Full CRUD interface for managing HVAC products with image upload, specifications editor, and Pik.ba cross-posting toggle.
+Build complete CRUD system for product management with image upload to Supabase Storage and special Pik.ba cross-posting toggle. When toggle is active, syncToPikBa() function is triggered after successful product save.
 
 ## Checklist
-- [ ] Products list page with search/filter
-- [ ] Add product form with all fields
-- [ ] Edit product form
-- [ ] Delete product confirmation
-- [ ] Image upload to Supabase Storage
-- [ ] Pik.ba auto-publish toggle and logic
-- [ ] Stock management interface
+- [x] Create productAdminService with CRUD + syncToPikBa()
+- [x] Build /admin/products list page with search
+- [x] Create /admin/products/new form with Pik.ba toggle
+- [ ] Create /admin/products/[id] edit form
+- [ ] Test Supabase Storage upload
+- [ ] Verify Pik.ba toggle triggers sync
 
 ## Acceptance
-- Admin can create/edit/delete products
+- Admins can create/edit/delete products
 - Images upload successfully to Supabase Storage
 - Pik.ba toggle triggers cross-posting flow
