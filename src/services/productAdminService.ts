@@ -12,7 +12,6 @@ export interface ProductFormData {
   category_id: string;
   image_url: string | null;
   is_featured: boolean;
-  publish_to_pikba: boolean;
 }
 
 export const productAdminService = {
@@ -32,11 +31,9 @@ export const productAdminService = {
   },
 
   async createProduct(data: ProductFormData): Promise<Product> {
-    const { publish_to_pikba, ...productData } = data;
-    
     const { data: product, error } = await supabase
       .from("products")
-      .insert(productData)
+      .insert(data)
       .select()
       .single();
 
@@ -45,20 +42,13 @@ export const productAdminService = {
       throw error;
     }
 
-    // If Pik.ba toggle is active, trigger cross-posting
-    if (publish_to_pikba && product) {
-      await this.syncToPikBa(product);
-    }
-
     return product;
   },
 
   async updateProduct(id: string, data: Partial<ProductFormData>): Promise<Product> {
-    const { publish_to_pikba, ...productData } = data;
-
     const { data: product, error } = await supabase
       .from("products")
-      .update(productData)
+      .update(data)
       .eq("id", id)
       .select()
       .single();
@@ -66,11 +56,6 @@ export const productAdminService = {
     if (error) {
       console.error("Error updating product:", error);
       throw error;
-    }
-
-    // If Pik.ba toggle is active, trigger cross-posting
-    if (publish_to_pikba && product) {
-      await this.syncToPikBa(product);
     }
 
     return product;
@@ -129,42 +114,34 @@ export const productAdminService = {
     }
   },
 
-  async syncToPikBa(product: Product): Promise<void> {
+  /**
+   * Helper to format product data for OLX.ba posting
+   * Opens OLX.ba in new tab and copies formatted text to clipboard
+   */
+  async openOlxWithData(product: { name: string; price: number; description: string | null }): Promise<void> {
+    const formattedText = `Naslov: ${product.name}
+
+Cijena: ${product.price.toFixed(2)} KM
+
+Opis:
+${product.description || ""}
+
+---
+ALZA - Grijanje i Hlađenje
+Tel: [Vaš telefon]
+`;
+
     try {
-      console.log("🔄 Syncing to Pik.ba:", product.name);
+      // Copy to clipboard
+      await navigator.clipboard.writeText(formattedText);
       
-      // TODO: Implement actual Pik.ba API integration
-      // This is a placeholder for the cross-posting logic
-      const pikBaData = {
-        title: product.name,
-        description: product.description,
-        price: product.price,
-        images: product.image_url ? [product.image_url] : [],
-        category: "hvac", // Map to Pik.ba category
-        location: "Sarajevo", // Default location
-      };
-
-      // In production, this would make an API call to Pik.ba
-      // const response = await fetch("https://api.pik.ba/listings", {
-      //   method: "POST",
-      //   headers: {
-      //     "Authorization": `Bearer ${process.env.PIKBA_API_KEY}`,
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify(pikBaData),
-      // });
-
-      console.log("✅ Pik.ba sync completed (mock):", pikBaData);
+      // Open OLX.ba in new tab
+      window.open("https://www.olx.ba/objavi-oglas/", "_blank");
       
-      // Store Pik.ba listing ID in database if needed
-      // await supabase
-      //   .from("products")
-      //   .update({ pikba_listing_id: response.id })
-      //   .eq("id", product.id);
-
+      return Promise.resolve();
     } catch (error) {
-      console.error("❌ Pik.ba sync failed:", error);
-      // Don't throw - allow product creation to succeed even if sync fails
+      console.error("Failed to copy to clipboard:", error);
+      throw new Error("Clipboard pristup nije dozvoljen");
     }
   },
 };

@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, ArrowLeft, Upload, X, ExternalLink } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, X, ExternalLink, Copy, Check } from "lucide-react";
 import Image from "next/image";
 
 export default function NewProductPage() {
@@ -30,6 +30,7 @@ export default function NewProductPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [olxCopied, setOlxCopied] = useState(false);
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -40,7 +41,6 @@ export default function NewProductPage() {
     category_id: "",
     image_url: null,
     is_featured: false,
-    publish_to_pikba: false,
   });
 
   useEffect(() => {
@@ -92,6 +92,24 @@ export default function NewProductPage() {
     setFormData({ ...formData, image_url: null });
   };
 
+  const handleOlxPublish = async () => {
+    try {
+      await productAdminService.openOlxWithData({
+        name: formData.name,
+        price: formData.price,
+        description: formData.description,
+      });
+      
+      setOlxCopied(true);
+      setTimeout(() => setOlxCopied(false), 3000);
+      
+      alert("✅ Podaci kopirani u clipboard!\n\nOLX.ba stranica je otvorena u novom tabu.\nPaste-ujte podatke (Ctrl+V ili Cmd+V) u formu.");
+    } catch (error) {
+      console.error("Failed to open OLX:", error);
+      alert("❌ Greška: " + (error as Error).message);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -113,12 +131,7 @@ export default function NewProductPage() {
       });
 
       // Show success message
-      if (formData.publish_to_pikba) {
-        alert("Proizvod uspješno kreiran i objavljen na Pik.ba! ✅");
-      } else {
-        alert("Proizvod uspješno kreiran! ✅");
-      }
-
+      alert("Proizvod uspješno kreiran! ✅");
       router.push("/admin/products");
     } catch (error) {
       console.error("Failed to create product:", error);
@@ -298,34 +311,44 @@ export default function NewProductPage() {
                   />
                 </div>
 
-                {/* PIK.BA TOGGLE - KEY FEATURE */}
+                {/* OLX.BA PUBLISH BUTTON */}
                 <div className="p-6 rounded-lg border-2 border-primary/30 bg-primary/5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Label htmlFor="pikba" className="font-mono text-lg cursor-pointer">
-                          Objavi automatski i na OLX (Pik.ba)
-                        </Label>
-                        <ExternalLink className="w-4 h-4 text-primary" />
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <ExternalLink className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                      <div className="flex-1">
+                        <h3 className="font-mono text-lg font-semibold mb-2">Objavi na OLX.ba</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Kliknite dugme da otvorite OLX.ba stranicu za objavu oglasa. Svi podaci proizvoda će automatski biti kopirani u clipboard - samo ih paste-ujte u formu.
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        Kada je aktivirano, proizvod će biti automatski objavljen na Pik.ba marketplace nakon kreiranja
-                      </p>
                     </div>
-                    <Switch
-                      id="pikba"
-                      checked={formData.publish_to_pikba}
-                      onCheckedChange={(checked) => setFormData({ ...formData, publish_to_pikba: checked })}
-                      className="data-[state=checked]:bg-primary"
-                    />
+
+                    <Button
+                      type="button"
+                      onClick={handleOlxPublish}
+                      disabled={!formData.name || formData.price <= 0}
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                    >
+                      {olxCopied ? (
+                        <>
+                          <Check className="w-5 h-5 mr-2" />
+                          Podaci kopirani! OLX.ba otvoren
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-5 h-5 mr-2" />
+                          Kopiraj podatke i otvori OLX.ba
+                        </>
+                      )}
+                    </Button>
+
+                    {!formData.name || formData.price <= 0 ? (
+                      <p className="text-xs text-muted-foreground text-center">
+                        Popunite naziv i cijenu da bi aktivirali OLX dugme
+                      </p>
+                    ) : null}
                   </div>
-                  {formData.publish_to_pikba && (
-                    <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/30">
-                      <p className="text-xs font-mono text-primary">
-                        ✓ Cross-posting će biti triggerovan nakon uspješnog kreiranja proizvoda
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -351,10 +374,7 @@ export default function NewProductPage() {
                       {uploadingImage ? "Uploading..." : "Kreiranje..."}
                     </>
                   ) : (
-                    <>
-                      Kreiraj Proizvod
-                      {formData.publish_to_pikba && " + Pik.ba"}
-                    </>
+                    "Kreiraj Proizvod"
                   )}
                 </NeonButton>
               </div>

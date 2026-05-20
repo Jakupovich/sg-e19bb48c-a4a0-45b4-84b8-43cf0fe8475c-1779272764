@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, ArrowLeft, Upload, X, ExternalLink } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, X, ExternalLink, Copy, Check } from "lucide-react";
 import Image from "next/image";
 
 export default function EditProductPage() {
@@ -32,6 +32,7 @@ export default function EditProductPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [olxCopied, setOlxCopied] = useState(false);
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -42,7 +43,6 @@ export default function EditProductPage() {
     category_id: "",
     image_url: null,
     is_featured: false,
-    publish_to_pikba: false,
   });
 
   useEffect(() => {
@@ -66,7 +66,6 @@ export default function EditProductPage() {
           category_id: product.category_id || "",
           image_url: product.image_url,
           is_featured: product.is_featured || false,
-          publish_to_pikba: false, // Default to false for edits
         });
         
         if (product.image_url) {
@@ -119,6 +118,24 @@ export default function EditProductPage() {
     setFormData({ ...formData, image_url: null });
   };
 
+  const handleOlxPublish = async () => {
+    try {
+      await productAdminService.openOlxWithData({
+        name: formData.name,
+        price: formData.price,
+        description: formData.description,
+      });
+      
+      setOlxCopied(true);
+      setTimeout(() => setOlxCopied(false), 3000);
+      
+      alert("✅ Podaci kopirani u clipboard!\n\nOLX.ba stranica je otvorena u novom tabu.\nPaste-ujte podatke (Ctrl+V ili Cmd+V) u formu.");
+    } catch (error) {
+      console.error("Failed to open OLX:", error);
+      alert("❌ Greška: " + (error as Error).message);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id || typeof id !== "string") return;
@@ -128,25 +145,18 @@ export default function EditProductPage() {
     try {
       let imageUrl = formData.image_url;
 
-      // Upload image if a new one is selected
       if (imageFile) {
         setUploadingImage(true);
         imageUrl = await productAdminService.uploadImage(imageFile);
         setUploadingImage(false);
       }
 
-      // Update product
       await productAdminService.updateProduct(id, {
         ...formData,
         image_url: imageUrl,
       });
 
-      if (formData.publish_to_pikba) {
-        alert("Proizvod uspješno ažuriran i ažuriran na Pik.ba! ✅");
-      } else {
-        alert("Proizvod uspješno ažuriran! ✅");
-      }
-
+      alert("Proizvod uspješno ažuriran! ✅");
       router.push("/admin/products");
     } catch (error) {
       console.error("Failed to update product:", error);
@@ -321,25 +331,37 @@ export default function EditProductPage() {
                   />
                 </div>
 
+                {/* OLX.BA PUBLISH BUTTON */}
                 <div className="p-6 rounded-lg border-2 border-primary/30 bg-primary/5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Label htmlFor="pikba" className="font-mono text-lg cursor-pointer">
-                          Ažuriraj i na OLX (Pik.ba)
-                        </Label>
-                        <ExternalLink className="w-4 h-4 text-primary" />
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <ExternalLink className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                      <div className="flex-1">
+                        <h3 className="font-mono text-lg font-semibold mb-2">Objavi na OLX.ba</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Kliknite dugme da otvorite OLX.ba stranicu za objavu oglasa. Svi podaci proizvoda će automatski biti kopirani u clipboard - samo ih paste-ujte u formu.
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        Sinhronizuj izmjene sa postojećim listingom na Pik.ba
-                      </p>
                     </div>
-                    <Switch
-                      id="pikba"
-                      checked={formData.publish_to_pikba}
-                      onCheckedChange={(checked) => setFormData({ ...formData, publish_to_pikba: checked })}
-                      className="data-[state=checked]:bg-primary"
-                    />
+
+                    <Button
+                      type="button"
+                      onClick={handleOlxPublish}
+                      disabled={!formData.name || formData.price <= 0}
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                    >
+                      {olxCopied ? (
+                        <>
+                          <Check className="w-5 h-5 mr-2" />
+                          Podaci kopirani! OLX.ba otvoren
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-5 h-5 mr-2" />
+                          Kopiraj podatke i otvori OLX.ba
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -366,10 +388,7 @@ export default function EditProductPage() {
                       {uploadingImage ? "Uploading..." : "Ažuriranje..."}
                     </>
                   ) : (
-                    <>
-                      Sačuvaj Izmjene
-                      {formData.publish_to_pikba && " + Pik.ba"}
-                    </>
+                    "Sačuvaj Izmjene"
                   )}
                 </NeonButton>
               </div>
