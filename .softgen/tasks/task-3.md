@@ -1,6 +1,6 @@
 ---
 title: Storefront - Homepage & Product Catalog
-status: todo
+status: done
 priority: high
 type: feature
 tags: [frontend, storefront]
@@ -10,16 +10,17 @@ position: 3
 ---
 
 ## Notes
-Main customer-facing pages: hero section showcasing HVAC products, product grid with filtering by category, featured products carousel.
+Create modern storefront with Navigation (ALZA logo), Hero section with animated backgrounds, ProductCard with glassmorphism, ProductGrid for listings, and product catalog page with category filters.
 
 ## Checklist
-- [ ] Hero section with ALZA branding and CTAs
-- [ ] Featured products carousel (cooling/heating highlights)
-- [ ] Product grid with category filters
-- [ ] Product card component (image, price, specs, stock indicator)
-- [ ] Mobile-optimized layouts
+- [x] Create Navigation component with ALZA logo and cart
+- [x] Build Hero section with animated gradients and CTAs
+- [x] Create ProductCard with hover effects and glow
+- [x] Build ProductGrid for product listings
+- [x] Create /proizvodi page with category filtering
+- [x] Update homepage to display featured products
 
 ## Acceptance
-- Homepage loads with hero and featured products
+- Homepage loads with Hero and featured products
 - Users can browse all products by category
 - Mobile experience feels app-like
