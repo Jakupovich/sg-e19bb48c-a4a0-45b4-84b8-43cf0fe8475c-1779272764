@@ -23,14 +23,18 @@ export const orderService = {
     items: OrderItem[],
     total: number
   ): Promise<Order> {
-    // Create order
+    // Get current user if logged in
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Create order with proper shipping_address as JSONB
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
+        user_id: user?.id || null,
         customer_name: checkoutData.customer_name,
         customer_email: checkoutData.customer_email,
         customer_phone: checkoutData.customer_phone,
-        shipping_address: checkoutData.shipping_address,
+        shipping_address: { address: checkoutData.shipping_address }, // JSONB format
         notes: checkoutData.notes || null,
         total,
         status: "pending",

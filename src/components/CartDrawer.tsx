@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { X, Minus, Plus, ShoppingBag, Trash2, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { X, Minus, Plus, ShoppingBag, Trash2, ArrowLeft, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -19,6 +20,7 @@ export function CartDrawer() {
   const [view, setView] = useState<View>("cart");
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
   const [checkoutData, setCheckoutData] = useState<CheckoutData>({
     customer_name: "",
@@ -33,6 +35,7 @@ export function CartDrawer() {
     // Reset after animation completes
     setTimeout(() => {
       setView("cart");
+      setError(null);
       setCheckoutData({
         customer_name: "",
         customer_email: "",
@@ -46,6 +49,7 @@ export function CartDrawer() {
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setError(null);
 
     try {
       const orderItems = items.map((item) => ({
@@ -59,9 +63,27 @@ export function CartDrawer() {
       setOrderNumber(order.id);
       setView("success");
       clearCart();
-    } catch (error) {
-      console.error("Order submission failed:", error);
-      alert("Greška prilikom kreiranja narudžbe. Molimo pokušajte ponovo.");
+    } catch (err: any) {
+      console.error("Order submission failed:", err);
+      
+      // Parse error message
+      let errorMessage = "Greška prilikom kreiranja narudžbe.";
+      
+      if (err?.message) {
+        errorMessage = err.message;
+      } else if (err?.error?.message) {
+        errorMessage = err.error.message;
+      } else if (err?.code) {
+        if (err.code === "42501") {
+          errorMessage = "Nemate dozvolu za kreiranje narudžbe. Molimo prijavite se ili kontaktirajte podršku.";
+        } else if (err.code === "23503") {
+          errorMessage = "Greška sa podacima proizvoda. Molimo osvježite stranicu.";
+        } else {
+          errorMessage = `Greška (${err.code}): ${err.message || "Nepoznata greška"}`;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -88,7 +110,10 @@ export function CartDrawer() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setView("cart")}
+                    onClick={() => {
+                      setView("cart");
+                      setError(null);
+                    }}
                     className="mr-2"
                   >
                     <ArrowLeft className="w-5 h-5" />
@@ -208,6 +233,16 @@ export function CartDrawer() {
             {/* CHECKOUT VIEW */}
             {view === "checkout" && (
               <form onSubmit={handleCheckout} className="space-y-6">
+                {/* Error Alert */}
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="ml-2">
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="name" className="font-mono">Ime i prezime *</Label>
