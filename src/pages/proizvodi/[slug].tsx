@@ -28,6 +28,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<ProductWithCategory | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     async function loadProduct() {
@@ -77,6 +78,10 @@ export default function ProductDetailPage() {
   const Icon = isCooling ? Snowflake : Flame;
   const glowColor = isCooling ? "blue" : "red";
 
+  const images = product.images || [];
+  const hasImages = images.length > 0;
+  const currentImage = hasImages ? images[selectedImageIndex] : null;
+
   const handleAddToCart = () => {
     addItem(product, quantity);
   };
@@ -86,7 +91,7 @@ export default function ProductDetailPage() {
       <SEO
         title={`${product.name} - ALZA Grijanje i Hlađenje`}
         description={product.description || `Pregledajte detalje proizvoda ${product.name} u ALZA ponudi.`}
-        image={product.image_url || undefined}
+        image={currentImage || undefined}
       />
 
       <div className="min-h-screen">
@@ -95,29 +100,55 @@ export default function ProductDetailPage() {
         <div className="container pt-32 pb-20">
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Image Gallery */}
-            <GlassCard className="overflow-hidden" glow={glowColor}>
-              <div className="relative aspect-square">
-                {product.image_url ? (
-                  <Image
-                    src={product.image_url}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-muted/20">
-                    <Icon className={`w-40 h-40 ${isCooling ? 'text-primary' : 'text-secondary'}`} />
-                  </div>
-                )}
+            <div className="space-y-4">
+              <GlassCard className="overflow-hidden" glow={glowColor}>
+                <div className="relative aspect-square">
+                  {currentImage ? (
+                    <Image
+                      src={currentImage}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted/20">
+                      <Icon className={`w-40 h-40 ${isCooling ? 'text-primary' : 'text-secondary'}`} />
+                    </div>
+                  )}
 
-                {product.is_featured && (
-                  <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground border-neon-blue text-lg px-4 py-2">
-                    Featured
-                  </Badge>
-                )}
-              </div>
-            </GlassCard>
+                  {product.is_featured && (
+                    <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground border-neon-blue text-lg px-4 py-2">
+                      Featured
+                    </Badge>
+                  )}
+                </div>
+              </GlassCard>
+
+              {/* Thumbnail Gallery */}
+              {images.length > 1 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImageIndex(idx)}
+                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                        selectedImageIndex === idx
+                          ? 'border-primary shadow-lg'
+                          : 'border-border/30 hover:border-primary/50'
+                      }`}
+                    >
+                      <Image
+                        src={img}
+                        alt={`${product.name} - slika ${idx + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Product Info */}
             <div className="space-y-6">

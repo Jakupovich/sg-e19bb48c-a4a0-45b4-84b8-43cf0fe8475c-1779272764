@@ -23,6 +23,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const glowColor = isCooling ? "blue" : "red";
   const Icon = isCooling ? Snowflake : Flame;
 
+  // Get first image from images array
+  const firstImage = product.images?.[0] || null;
+
   return (
     <Link href={`/proizvodi/${product.slug}`}>
       <GlassCard 
@@ -32,9 +35,9 @@ export function ProductCard({ product }: ProductCardProps) {
       >
         {/* Image */}
         <div className="relative aspect-square mb-4 overflow-hidden rounded-lg bg-muted/20">
-          {product.image_url ? (
+          {firstImage ? (
             <Image
-              src={product.image_url}
+              src={firstImage}
               alt={product.name}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-110"
