@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, ArrowLeft, Upload, X, ExternalLink, Copy, Check } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, X, Copy, Check } from "lucide-react";
 import Image from "next/image";
 
 export default function NewProductPage() {
@@ -27,9 +27,9 @@ export default function NewProductPage() {
   
   const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([]);
   const [loading, setLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [olxCopied, setOlxCopied] = useState(false);
 
   const [formData, setFormData] = useState<ProductFormData>({
@@ -39,7 +39,7 @@ export default function NewProductPage() {
     price: 0,
     stock: 0,
     category_id: "",
-    image_url: null,
+    images: [],
     is_featured: false,
   });
 
@@ -56,7 +56,6 @@ export default function NewProductPage() {
     loadCategories();
   }, [user]);
 
-  // Auto-generate slug from name
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -75,26 +74,28 @@ export default function NewProductPage() {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    setImageFiles((prev) => [...prev, ...files]);
+
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
-  const removeImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    setFormData({ ...formData, image_url: null });
+  const removeImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleOlxPublish = async () => {
+  const handleOlxCopy = async () => {
     try {
-      await productAdminService.openOlxWithData({
+      await productAdminService.copyToClipboard({
         name: formData.name,
         price: formData.price,
         description: formData.description,
@@ -102,10 +103,8 @@ export default function NewProductPage() {
       
       setOlxCopied(true);
       setTimeout(() => setOlxCopied(false), 3000);
-      
-      alert("✅ Podaci kopirani u clipboard!\n\nOLX.ba stranica je otvorena u novom tabu.\nPaste-ujte podatke (Ctrl+V ili Cmd+V) u formu.");
     } catch (error) {
-      console.error("Failed to open OLX:", error);
+      console.error("Failed to copy:", error);
       alert("❌ Greška: " + (error as Error).message);
     }
   };
@@ -115,22 +114,22 @@ export default function NewProductPage() {
     setLoading(true);
 
     try {
-      let imageUrl = formData.image_url;
+      const imageUrls: string[] = [];
 
-      // Upload image if selected
-      if (imageFile) {
-        setUploadingImage(true);
-        imageUrl = await productAdminService.uploadImage(imageFile);
-        setUploadingImage(false);
+      if (imageFiles.length > 0) {
+        setUploadingImages(true);
+        for (const file of imageFiles) {
+          const url = await productAdminService.uploadImage(file);
+          imageUrls.push(url);
+        }
+        setUploadingImages(false);
       }
 
-      // Create product
       await productAdminService.createProduct({
         ...formData,
-        image_url: imageUrl,
+        images: imageUrls,
       });
 
-      // Show success message
       alert("Proizvod uspješno kreiran! ✅");
       router.push("/admin/products");
     } catch (error) {
@@ -138,7 +137,7 @@ export default function NewProductPage() {
       alert("Greška prilikom kreiranja proizvoda");
     } finally {
       setLoading(false);
-      setUploadingImage(false);
+      setUploadingImages(false);
     }
   };
 
@@ -173,44 +172,59 @@ export default function NewProductPage() {
 
           <GlassCard className="max-w-4xl">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Image Upload */}
+              {/* Multiple Images Upload */}
               <div className="space-y-4">
-                <Label className="font-mono text-lg">Slika Proizvoda</Label>
-                {imagePreview ? (
-                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted/20">
-                    <Image
-                      src={imagePreview}
-                      alt="Preview"
-                      fill
-                      className="object-cover"
-                    />
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="destructive"
-                      className="absolute top-2 right-2"
-                      onClick={removeImage}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
+                <Label className="font-mono text-lg">Slike Proizvoda</Label>
+                
+                {/* Image Previews */}
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-muted/20">
+                        <Image
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="destructive"
+                          className="absolute top-2 right-2 h-8 w-8"
+                          onClick={() => removeImage(index)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-muted/10">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-12 h-12 mb-4 text-muted-foreground" />
-                      <p className="mb-2 text-sm text-muted-foreground">
-                        <span className="font-semibold">Kliknite za upload</span> ili drag & drop
-                      </p>
-                      <p className="text-xs text-muted-foreground">PNG, JPG, WebP (MAX. 5MB)</p>
-                    </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
-                  </label>
                 )}
+
+                {/* Upload Area */}
+                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-muted/10">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-10 h-10 mb-3 text-muted-foreground" />
+                    <p className="mb-2 text-sm text-muted-foreground">
+                      <span className="font-semibold">Kliknite za upload</span> ili drag & drop
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      PNG, JPG, WebP (Možete dodati više slika)
+                    </p>
+                    {imagePreviews.length > 0 && (
+                      <p className="text-xs text-primary font-mono mt-2">
+                        {imagePreviews.length} slika dodano
+                      </p>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                  />
+                </label>
               </div>
 
               {/* Basic Info */}
@@ -311,34 +325,34 @@ export default function NewProductPage() {
                   />
                 </div>
 
-                {/* OLX.BA PUBLISH BUTTON */}
+                {/* OLX.BA COPY BUTTON */}
                 <div className="p-6 rounded-lg border-2 border-primary/30 bg-primary/5">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <ExternalLink className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                      <Copy className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                       <div className="flex-1">
-                        <h3 className="font-mono text-lg font-semibold mb-2">Objavi na OLX.ba</h3>
+                        <h3 className="font-mono text-lg font-semibold mb-2">Kopiraj za OLX.ba</h3>
                         <p className="text-sm text-muted-foreground mb-4">
-                          Kliknite dugme da otvorite OLX.ba stranicu za objavu oglasa. Svi podaci proizvoda će automatski biti kopirani u clipboard - samo ih paste-ujte u formu.
+                          Kliknite dugme da kopirate sve podatke proizvoda u clipboard. Zatim idite na OLX.ba i paste-ujte podatke u formu.
                         </p>
                       </div>
                     </div>
 
                     <Button
                       type="button"
-                      onClick={handleOlxPublish}
+                      onClick={handleOlxCopy}
                       disabled={!formData.name || formData.price <= 0}
                       className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                       {olxCopied ? (
                         <>
                           <Check className="w-5 h-5 mr-2" />
-                          Podaci kopirani! OLX.ba otvoren
+                          ✅ Podaci kopirani u clipboard!
                         </>
                       ) : (
                         <>
                           <Copy className="w-5 h-5 mr-2" />
-                          Kopiraj podatke i otvori OLX.ba
+                          Kopiraj podatke za OLX
                         </>
                       )}
                     </Button>
@@ -365,13 +379,13 @@ export default function NewProductPage() {
                 <NeonButton
                   type="submit"
                   variant="blue"
-                  disabled={loading || uploadingImage}
+                  disabled={loading || uploadingImages}
                   className="flex-1"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      {uploadingImage ? "Uploading..." : "Kreiranje..."}
+                      {uploadingImages ? `Uploading ${imageFiles.length} slika...` : "Kreiranje..."}
                     </>
                   ) : (
                     "Kreiraj Proizvod"

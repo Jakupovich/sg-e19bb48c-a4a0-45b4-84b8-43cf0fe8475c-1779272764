@@ -10,7 +10,7 @@ export interface ProductFormData {
   price: number;
   stock: number;
   category_id: string;
-  image_url: string | null;
+  images: string[];
   is_featured: boolean;
 }
 
@@ -115,10 +115,10 @@ export const productAdminService = {
   },
 
   /**
-   * Helper to format product data for OLX.ba posting
-   * Opens OLX.ba in new tab and copies formatted text to clipboard
+   * Copy product data to clipboard for OLX.ba posting
+   * Does NOT open OLX - user copies data manually
    */
-  async openOlxWithData(product: { name: string; price: number; description: string | null }): Promise<void> {
+  async copyToClipboard(product: { name: string; price: number; description: string | null }): Promise<void> {
     const formattedText = `Naslov: ${product.name}
 
 Cijena: ${product.price.toFixed(2)} KM
@@ -132,12 +132,7 @@ Tel: [Vaš telefon]
 `;
 
     try {
-      // Copy to clipboard
       await navigator.clipboard.writeText(formattedText);
-      
-      // Open OLX.ba in new tab
-      window.open("https://www.olx.ba/objavi-oglas/", "_blank");
-      
       return Promise.resolve();
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);
