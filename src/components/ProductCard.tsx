@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Snowflake, Flame } from "lucide-react";
+import { ShoppingCart, Snowflake, Flame, Images } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
   // Get first image from images array
   const firstImage = product.images?.[0] || null;
+  const imageCount = product.images?.length || 0;
+  const hasMultipleImages = imageCount > 1;
 
   return (
     <Link href={`/proizvodi/${product.slug}`}>
@@ -48,12 +50,20 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
           
-          {/* Badge */}
-          {product.is_featured && (
-            <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground border-neon-blue">
-              Featured
-            </Badge>
-          )}
+          {/* Badges Container */}
+          <div className="absolute top-2 right-2 flex flex-col gap-2">
+            {product.is_featured && (
+              <Badge className="bg-primary text-primary-foreground border-neon-blue">
+                Featured
+              </Badge>
+            )}
+            {hasMultipleImages && (
+              <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm flex items-center gap-1">
+                <Images className="w-3 h-3" />
+                <span>{imageCount} slike</span>
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Content */}
